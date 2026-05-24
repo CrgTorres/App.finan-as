@@ -1,15 +1,21 @@
 "use client"
 
-import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
+import { useTheme } from "@teispace/next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+
+  if (!mounted) return null
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={(resolvedTheme ?? "light") as ToasterProps["theme"]}
       className="toaster group"
       icons={{
         success: (

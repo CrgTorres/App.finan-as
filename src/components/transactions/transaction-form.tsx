@@ -21,6 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { emitDashboardDataUpdated } from "@/lib/dashboard-data-events";
+import { persistManualCategoryRule } from "@/lib/transacoes/classification-rules-service";
 
 interface TransactionFormProps {
   open: boolean;
@@ -36,6 +38,14 @@ const defaultForm: TransactionFormData = {
   type: "despesa",
   category: "Outros",
 };
+
+function formatAmountDisplay(value: number): string {
+  if (!value) return "";
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 export function TransactionForm({
   open,
@@ -54,6 +64,9 @@ export function TransactionForm({
         }
       : defaultForm
   );
+  const [amountDisplay, setAmountDisplay] = useState<string>(
+    transaction ? formatAmountDisplay(transaction.amount) : ""
+  );
   const [loading, setLoading] = useState(false);
 
   function updateField<K extends keyof TransactionFormData>(
@@ -61,6 +74,23 @@ export function TransactionForm({
     value: TransactionFormData[K]
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/\D/g, "");
+    if (!digits) {
+      setAmountDisplay("");
+      updateField("amount", 0);
+      return;
+    }
+    const cents = parseInt(digits, 10);
+    const value = cents / 100;
+    const formatted = value.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    setAmountDisplay(formatted);
+    updateField("amount", value);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -86,14 +116,22 @@ export function TransactionForm({
       return;
     }
 
-    const payload = { ...form, user_id: user.id };
+    const basePayload = {
+      ...form,
+      description: form.description.charAt(0).toUpperCase() + form.description.slice(1),
+      user_id: user.id,
+    };
 
     const { error } = transaction
       ? await supabase
           .from("transactions")
-          .update(payload)
+          .update(basePayload)
           .eq("id", transaction.id)
-      : await supabase.from("transactions").insert(payload);
+      : await supabase.from("transactions").insert({
+          ...basePayload,
+          source_ref: null,
+          source_imported_at: new Date().toISOString(),
+        });
 
     if (error) {
       toast.error("Erro ao salvar transação.");
@@ -101,12 +139,25 @@ export function TransactionForm({
       return;
     }
 
+    if (transaction && transaction.category !== form.category) {
+      void persistManualCategoryRule(
+        supabase,
+        user.id,
+        basePayload.description,
+        form.category
+      ).catch(() => {});
+    }
+
     toast.success(
       transaction ? "Transação atualizada!" : "Transação adicionada!"
     );
+    emitDashboardDataUpdated({ origin: "transacao_manual" });
     onSuccess();
     onClose();
-    if (!transaction) setForm(defaultForm);
+    if (!transaction) {
+      setForm(defaultForm);
+      setAmountDisplay("");
+    }
     setLoading(false);
   }
 
@@ -126,8 +177,8 @@ export function TransactionForm({
               onClick={() => updateField("type", "receita")}
               className={`py-2.5 rounded-lg text-sm font-medium border-2 transition-all ${
                 form.type === "receita"
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                  : "border-slate-200 text-slate-500 hover:border-slate-300"
+                  ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                  : "border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               Receita
@@ -137,8 +188,8 @@ export function TransactionForm({
               onClick={() => updateField("type", "despesa")}
               className={`py-2.5 rounded-lg text-sm font-medium border-2 transition-all ${
                 form.type === "despesa"
-                  ? "border-red-500 bg-red-50 text-red-700"
-                  : "border-slate-200 text-slate-500 hover:border-slate-300"
+                  ? "border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"
+                  : "border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               Despesa
@@ -158,18 +209,21 @@ export function TransactionForm({
 
           <div className="space-y-2">
             <Label htmlFor="amount">Valor (R$)</Label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0,00"
-              value={form.amount || ""}
-              onChange={(e) =>
-                updateField("amount", parseFloat(e.target.value) || 0)
-              }
-              required
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 dark:text-slate-400 pointer-events-none">
+                R$
+              </span>
+              <Input
+                id="amount"
+                type="text"
+                inputMode="numeric"
+                placeholder="0,00"
+                value={amountDisplay}
+                onChange={handleAmountChange}
+                className="pl-9 tabular-nums"
+                required
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

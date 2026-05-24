@@ -27,9 +27,9 @@ const CustomTooltip = ({
 }) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-white border border-slate-200 rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-slate-700">{payload[0].name}</p>
-        <p className="text-sm font-bold text-slate-900 mt-0.5">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{payload[0].name}</p>
+        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
           {formatCurrency(payload[0].value)}
         </p>
       </div>
@@ -41,13 +41,13 @@ const CustomTooltip = ({
 export function CategoryChart({ data, title }: CategoryChartProps) {
   if (data.length === 0) {
     return (
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm dark:bg-slate-900 dark:border dark:border-slate-700">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-slate-500">
+          <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">
             {title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-12 text-slate-400 text-sm">
+        <CardContent className="flex items-center justify-center py-12 text-slate-400 dark:text-slate-500 text-sm">
           Nenhum dado disponível
         </CardContent>
       </Card>
@@ -61,9 +61,9 @@ export function CategoryChart({ data, title }: CategoryChartProps) {
   }));
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 shadow-sm dark:bg-slate-900 dark:border dark:border-slate-700">
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-slate-500">
+        <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">
           {title}
         </CardTitle>
       </CardHeader>
@@ -88,7 +88,7 @@ export function CategoryChart({ data, title }: CategoryChartProps) {
               iconType="circle"
               iconSize={8}
               formatter={(value) => (
-                <span className="text-xs text-slate-600">{value}</span>
+                <span className="text-xs text-slate-600 dark:text-slate-300">{value}</span>
               )}
             />
           </PieChart>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { DASHBOARD_DATA_UPDATED } from "@/lib/dashboard-data-events";
 import type { Transaction, TransactionFilters } from "@/types";
 import { exportToCSV } from "@/lib/utils/csv";
 import { TransactionForm } from "@/components/transactions/transaction-form";
@@ -21,6 +22,7 @@ export default function TransactionsPage() {
   const [filters, setFilters] = useState<TransactionFilters>(defaultFilters);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [dataRefreshTick, setDataRefreshTick] = useState(0);
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
@@ -31,7 +33,12 @@ export default function TransactionsPage() {
       .select("*")
       .order("date", { ascending: false });
 
-    if (filters.month && filters.year) {
+    if (
+      filters.year != null &&
+      filters.month != null &&
+      filters.month >= 1 &&
+      filters.month <= 12
+    ) {
       const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
       const end = new Date(filters.year, filters.month, 0);
       const endStr = `${filters.year}-${String(filters.month).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}`;
@@ -57,7 +64,13 @@ export default function TransactionsPage() {
 
   useEffect(() => {
     fetchTransactions();
-  }, [fetchTransactions]);
+  }, [fetchTransactions, dataRefreshTick]);
+
+  useEffect(() => {
+    const onDataUpdated = () => setDataRefreshTick((n) => n + 1);
+    window.addEventListener(DASHBOARD_DATA_UPDATED, onDataUpdated);
+    return () => window.removeEventListener(DASHBOARD_DATA_UPDATED, onDataUpdated);
+  }, []);
 
   function handleExportCSV() {
     const filename = `transacoes-${filters.year ?? "todas"}-${filters.month ? String(filters.month).padStart(2, "0") : "todos"}`;
@@ -68,9 +81,13 @@ export default function TransactionsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Transações</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Transações</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
             {transactions.length} transação(ões) encontrada(s)
+            {filters.year != null &&
+            (filters.month === undefined || filters.month < 1 || filters.month > 12)
+              ? ` · período: todo o ano ${filters.year}`
+              : null}
           </p>
         </div>
         <div className="flex gap-2">

@@ -18,7 +18,7 @@ interface TransactionFiltersProps {
 }
 
 const currentYear = new Date().getFullYear();
-const years = [currentYear - 1, currentYear, currentYear + 1];
+const years = Array.from({ length: 14 }, (_, i) => currentYear - 8 + i);
 
 export function TransactionFiltersBar({
   filters,
@@ -46,7 +46,7 @@ export function TransactionFiltersBar({
           <SelectValue placeholder="Mês" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todos os meses</SelectItem>
+          <SelectItem value="all">Todo o ano (jan–dez)</SelectItem>
           {MONTHS.map((m, i) => (
             <SelectItem key={i} value={(i + 1).toString()}>
               {m}

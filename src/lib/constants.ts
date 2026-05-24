@@ -2,6 +2,8 @@ import type { Category } from "@/types";
 
 export const CATEGORIES: Category[] = [
   "Alimentação",
+  "Mercado",
+  "Combustível",
   "Transporte",
   "Moradia",
   "Lazer",
@@ -9,11 +11,21 @@ export const CATEGORIES: Category[] = [
   "Educação",
   "Salário",
   "Freelance",
+  "Pets",
+  "Receita",
+  "Conta de consumo",
+  "Cartão/Fatura",
+  "Boleto",
+  "Transferência própria",
+  "Transferência para terceiros",
+  "Empréstimo",
   "Outros",
 ];
 
 export const CATEGORY_COLORS: Record<Category, string> = {
   Alimentação: "#f97316",
+  Mercado: "#14b8a6",
+  Combustível: "#d97706",
   Transporte: "#3b82f6",
   Moradia: "#8b5cf6",
   Lazer: "#ec4899",
@@ -21,6 +33,14 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   Educação: "#f59e0b",
   Salário: "#06b6d4",
   Freelance: "#84cc16",
+  Pets: "#f472b6",
+  Receita: "#22c55e",
+  "Conta de consumo": "#6366f1",
+  "Cartão/Fatura": "#a855f7",
+  Boleto: "#0ea5e9",
+  "Transferência própria": "#64748b",
+  "Transferência para terceiros": "#78716c",
+  Empréstimo: "#dc2626",
   Outros: "#6b7280",
 };
 

@@ -49,9 +49,29 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ### 4. Deploy na Vercel
 
-1. Importe o repositório na Vercel
-2. Adicione as variáveis de ambiente
-3. Deploy automático a cada push
+1. **Importar o projeto** em [vercel.com](https://vercel.com) (GitHub/GitLab/Bitbucket).
+
+2. **Root Directory**  
+   Se este app está numa subpasta do monorepo (ex.: `financa-pessoal`), configure em **Settings → General → Root Directory** para essa pasta. Assim o build usa o `package-lock.json` correto.
+
+3. **Variáveis de ambiente** (Production / Preview / Development, conforme precisar):
+
+   | Nome | Valor |
+   |------|--------|
+   | `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto (Settings → API → Project URL) |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave **anon** **public** (nunca use service_role no frontend) |
+
+   Opcional: `NEXT_PUBLIC_SITE_URL` = URL da Vercel (ex. `https://meu-app.vercel.app`) para consistência em redirects.
+
+4. **Supabase Auth → URLs**  
+   Em **Authentication → URL Configuration**, adicione em **Redirect URLs** (e **Site URL** em produção):
+
+   - `https://SEU-DOMINIO.vercel.app/**`
+   - `http://localhost:3000/**` (para testes locais)
+
+5. Faça **Redeploy** após alterar variáveis.
+
+**Node.js:** o `package.json` define `engines.node >= 20.9.0`; a Vercel usa Node 20+ por padrão nas builds recentes.
 
 ## Estrutura
 
@@ -70,7 +90,7 @@ src/
 │   ├── constants.ts     # categorias, meses, cores
 │   └── utils/           # format, csv
 ├── types/               # Transaction, Category, etc.
-└── proxy.ts             # proteção de rotas
+└── proxy.ts             # middleware Next.js 16 — auth Supabase e rotas protegidas
 supabase/
 └── schema.sql           # DDL + RLS policies
 ```

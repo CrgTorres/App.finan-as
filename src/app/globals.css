@@ -127,4 +127,42 @@
   html {
     @apply font-sans;
   }
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+}
+
+@keyframes info-ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.info-ticker-animate:hover {
+  animation-play-state: paused;
+}
+
+.info-ticker-animate {
+  animation: info-ticker-scroll 120s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-ticker-animate {
+    animation: none;
+  }
+}
+
+@layer utilities {
+  /* Oculta a barra horizontal nativa da tabela quando há espelho fixo na viewport */
+  .transaction-table-hide-inner-x-scrollbar [data-slot="table-container"] {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .transaction-table-hide-inner-x-scrollbar [data-slot="table-container"]::-webkit-scrollbar {
+    height: 0;
+    width: 0;
+  }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
 const geist = Geist({
@@ -9,9 +10,9 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "FinançaHub — Controle suas finanças pessoais",
+  title: "Rotina Financeira Carlos Torres",
   description:
-    "App de gestão financeira pessoal: registre receitas e despesas, visualize seu saldo e exporte relatórios.",
+    "Controle financeiro pessoal: registre receitas e despesas, visualize seu saldo e exporte relatórios.",
 };
 
 export default function RootLayout({
@@ -20,10 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${geist.variable} h-full antialiased`}>
+    <html lang="pt-BR" className={`${geist.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col font-sans">
-        {children}
-        <Toaster richColors position="top-right" />
+        <ThemeProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );
